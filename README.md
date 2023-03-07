@@ -1,6 +1,6 @@
 # GO-OPENAI-PROXY
 
-基于 Go + 腾讯云云函数（部署到海外节点）实现 OpenAI API 代理
+基于 Go + 腾讯云 API 网关 + 云函数（部署到海外节点）实现 OpenAI API 调用代理
 
 编译打包：
 
@@ -12,9 +12,21 @@
 
 ![](https://image.gstatics.cn/2023/03/06/image-20230306171340547.png)
 
-你可以通过腾讯云云函数提供的测试工具进行测试，也可以本地通过 curl/postman 进行测试，使用的时候只需要将 `api.openai.com` 替换成代理域名即可：
+你可以通过腾讯云云函数提供的测试工具进行测试，也可以本地通过 curl/postman 进行测试，使用的时候只需要将 `api.openai.com` 替换成代理域名 `openai.geekr.cool` 即可：
  
 ![](https://image.gstatics.cn/2023/03/06/image-20230306173648325.png)
 
-你可以选择自己搭建，也可以直接使用我提供的代理，域名是 `openai.geekr.cool`，反正是免费的。关于代理背后的原理，可以看我在极客书房发布的这篇教程：[国内无法调用 OpenAI 接口的解决办法](https://geekr.dev/posts/chatgpt-website-by-laravel-10#toc-5)。
+你可以选择自己搭建，也可以直接使用我提供的代理域名 `openai.geekr.cool`，反正是免费的。关于代理背后的原理，可以看我在极客书房发布的这篇教程：[国内无法调用 OpenAI 接口的解决办法](https://geekr.dev/posts/chatgpt-website-by-laravel-10#toc-5)。
 
+本地调试请设置环境变量 `ENV=local`，并调整代理地址：
+
+```go
+// 本地测试通过代理请求 OpenAI 接口
+if os.Getenv("ENV") == "local" {
+    proxyURL, _ := url.Parse("http://127.0.0.1:10809")
+    client.Transport = &http.Transport{
+        Proxy:           http.ProxyURL(proxyURL),
+        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    }
+}
+```
