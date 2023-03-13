@@ -18,7 +18,7 @@
 
 你可以选择自己搭建，也可以直接使用我提供的代理域名 `open.aiproxy.xyz`，反正是免费的。关于代理背后的原理，可以看我在极客书房发布的这篇教程：[国内无法调用 OpenAI 接口的解决办法](https://geekr.dev/posts/chatgpt-website-by-laravel-10#toc-5)。
 
-本地调试请设置环境变量 `ENV=local`，并调整代理地址：
+本地调试走VPN的话可以设置环境变量 `ENV=local`，然后直连 `api.openai.com`：
 
 ```go
 // 本地测试通过代理请求 OpenAI 接口
