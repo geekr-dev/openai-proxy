@@ -1,16 +1,19 @@
 package main
 
 import (
-	"bytes"
 	"crypto/tls"
-	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+)
+
+var (
+	target    = "https://api.openai.com" // 目标域名
+	httpProxy = "http://127.0.0.1:10809" // 本地代理地址和端口
 )
 
 func main() {
@@ -19,112 +22,69 @@ func main() {
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
-	method := r.Method
-
-	reqUrl, err := url.Parse(r.URL.String())
+	// 过滤无效URL
+	_, err := url.Parse(r.URL.String())
 	if err != nil {
-		fmt.Println("Error parsing URL: ", err.Error())
+		log.Println("Error parsing URL: ", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	urlHostname := reqUrl.Hostname()
-	reqUrl.Scheme = "https"
-	reqUrl.Host = "api.openai.com"
 
 	// 去掉环境前缀（针对腾讯云，如果包含的话，目前我只用到了test和release）
-	reqUrl.Path = strings.Replace(reqUrl.Path, "/release", "", 1)
-	reqUrl.Path = strings.Replace(reqUrl.Path, "/test", "", 1)
+	newPath := strings.Replace(r.URL.Path, "/release", "", 1)
+	newPath = strings.Replace(newPath, "/test", "", 1)
 
-	// 请求头处理
-	reqHeaders := r.Header
-	newReqHeaders := make(http.Header)
-	for key, values := range reqHeaders {
-		for _, value := range values {
-			newReqHeaders.Add(key, value)
+	// 拼接目标URL
+	targetURL := target + newPath
+
+	// 创建代理HTTP请求
+	proxyReq, err := http.NewRequest(r.Method, targetURL, r.Body)
+	if err != nil {
+		log.Println("Error creating proxy request: ", err.Error())
+		http.Error(w, "Error creating proxy request", http.StatusInternalServerError)
+		return
+	}
+
+	// 将原始请求头复制到新请求中
+	for headerKey, headerValues := range r.Header {
+		for _, headerValue := range headerValues {
+			proxyReq.Header.Add(headerKey, headerValue)
 		}
 	}
-	newReqHeaders.Set("Host", reqUrl.Host)
-	newReqHeaders.Set("Referer", reqUrl.Scheme+"://"+urlHostname)
 
-	// 超时时间设置为30s
+	// 默认超时时间设置为60s
 	client := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 60 * time.Second,
 	}
+
 	// 本地测试通过代理请求 OpenAI 接口
 	if os.Getenv("ENV") == "local" {
-		proxyURL, _ := url.Parse("http://127.0.0.1:10809")
+		proxyURL, _ := url.Parse(httpProxy) // 本地HTTP代理配置
 		client.Transport = &http.Transport{
 			Proxy:           http.ProxyURL(proxyURL),
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 	}
 
-	var originResp *http.Response
-	// 支持最大重试次数为3次
-	tries := 0
-	for tries < 3 {
-		// 将request的body复制一份，以便在重试时使用
-		var reqBody io.ReadCloser
-		if r.Body != nil {
-			bodyCopy, _ := ioutil.ReadAll(r.Body)
-			reqBody = ioutil.NopCloser(bytes.NewBuffer(bodyCopy))
-		}
-		originResp, err = client.Do(&http.Request{
-			Method: method,
-			URL:    reqUrl,
-			Header: newReqHeaders,
-			Body:   reqBody,
-		})
-		if err != nil {
-			fmt.Println("Error making request: ", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		// 状态码为429/433时，自动重试，否则退出
-		if originResp.StatusCode == http.StatusTooManyRequests || originResp.StatusCode == 433 {
-			tries++
-			time.Sleep(1 * time.Second) // 间隔1s后重试
-		} else {
-			break
-		}
-	}
-	defer originResp.Body.Close()
-
-	// 处理响应数据返回给客户端
-	originRespClone := originResp
-	originalText, err := ioutil.ReadAll(originRespClone.Body)
+	// 向 OpenAI 发起代理请求
+	resp, err := client.Do(proxyReq)
 	if err != nil {
-		fmt.Println("Error reading response body: ", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Println("Error sending proxy request: ", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// 响应头
-	responseHeaders := originResp.Header
-	newRespHeaders := make(http.Header)
-	for key, values := range responseHeaders {
-		for _, value := range values {
-			newRespHeaders.Add(key, value)
-		}
-	}
-	newRespHeaders.Set("Cache-Control", "no-store")
-	newRespHeaders.Set("access-control-allow-origin", "*")
-	newRespHeaders.Set("access-control-allow-credentials", "true")
-	newRespHeaders.Del("content-security-policy")
-	newRespHeaders.Del("content-security-policy-report-only")
-	newRespHeaders.Del("clear-site-data")
+	defer resp.Body.Close()
 
-	// 响应对象封装
-	response := &http.Response{
-		StatusCode: originResp.StatusCode,
-		Header:     newRespHeaders,
-		Body:       ioutil.NopCloser(bytes.NewReader(originalText)),
-	}
-
-	for key, values := range response.Header {
+	// 将响应头复制到代理响应头中
+	for key, values := range resp.Header {
 		for _, value := range values {
 			w.Header().Add(key, value)
 		}
 	}
-	w.WriteHeader(response.StatusCode)
-	io.Copy(w, response.Body)
+
+	// 将响应状态码设置为原始响应状态码
+	w.WriteHeader(resp.StatusCode)
+
+	// 将响应实体写入到响应流中（支持流式响应）
+	io.Copy(w, resp.Body)
 }
