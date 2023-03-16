@@ -30,3 +30,7 @@ if os.Getenv("ENV") == "local" {
     }
 }
 ```
+
+目前腾讯云函数并支持分块流式传输，如果你想这么做，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI 代理了，如果你不想折腾，可以使用我这边提供的 `open2.aiproxy.xyz` 作为代理进行测试：
+
+<img width="965" alt="image" src="https://user-images.githubusercontent.com/114386672/225609817-ca5c106b-22d4-4ae9-b3df-ca2c46d56843.png">
