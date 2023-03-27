@@ -86,5 +86,24 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 
 	// 将响应实体写入到响应流中（支持流式响应）
-	io.Copy(w, resp.Body)
+	buf := make([]byte, 512)
+	for {
+		n, err := resp.Body.Read(buf)
+		if n > 0 {
+			_, writeErr := w.Write(buf[:n])
+			if writeErr != nil {
+				log.Println("Error writing to response: ", writeErr.Error())
+				return
+			}
+			w.(http.Flusher).Flush()
+		}
+
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Println("Error reading from response: ", err.Error())
+			return
+		}
+	}
 }
