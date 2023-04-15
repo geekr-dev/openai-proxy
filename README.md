@@ -2,11 +2,13 @@
 
 基于 Go + 腾讯云 API 网关 + 云函数（部署到海外节点）实现 OpenAI API 调用代理
 
-### 编译打包：
+### 编译打包
 
 ```bash
 ./build.sh
 ```
+
+如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://chat2.gstatics.cn/main.zip>
 
 ### 部署测试
 
