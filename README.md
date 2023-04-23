@@ -1,6 +1,6 @@
 # GO-OPENAI-PROXY
 
-基于 Go + 腾讯云 API 网关 + 云函数（部署到海外节点）实现 OpenAI API 调用代理
+基于 Go 实现的 OpenAI API HTTP 代理
 
 ### 编译打包
 
@@ -11,6 +11,8 @@
 如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://chat2.gstatics.cn/main.zip>
 
 ### 部署测试
+
+> 支持部署到腾讯/阿里云函数、AWS lambda 函数以及任意云服务器，以下以腾讯云函数为例进行演示。
 
 然后在腾讯云云函数代码管理界面上传打包好 zip 包即可完成部署：
 
@@ -36,6 +38,6 @@ if os.Getenv("ENV") == "local" {
 ```
 ### 流式响应支持
 
-这个源代码本身是支持 stream 流式响应代理的，但目前腾讯云函数并不支持分块流式传输。所以，如果你需要实现流式响应，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI HTTP 代理了，如果你不想折腾，可以使用我这边提供的 `open2.aiproxy.xyz` 作为代理进行测试：
+这个源代码本身是支持 stream 流式响应代理的，但目前腾讯云函数并不支持分块流式传输。所以，如果你需要实现流式响应，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI HTTP 代理了，如果你不想折腾，可以使用我这边提供的 `open.aiproxy.xyz` 作为代理进行测试：
 
 <img width="965" alt="image" src="https://user-images.githubusercontent.com/114386672/225609817-ca5c106b-22d4-4ae9-b3df-ca2c46d56843.png">
