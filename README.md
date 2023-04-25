@@ -41,3 +41,10 @@ if os.Getenv("ENV") == "local" {
 这个源代码本身是支持 stream 流式响应代理的，但目前腾讯云函数并不支持分块流式传输。所以，如果你需要实现流式响应，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI HTTP 代理了，如果你不想折腾，可以使用我这边提供的 `open.aiproxy.xyz` 作为代理进行测试：
 
 <img width="965" alt="image" src="https://user-images.githubusercontent.com/114386672/225609817-ca5c106b-22d4-4ae9-b3df-ca2c46d56843.png">
+
+如果你是通过 Nginx 这种反向代理对外提供服务，记得通过如下配置项将默认缓冲和缓存关掉才会生效：
+
+```
+proxy_buffering off;
+proxy_cache off;
+```
