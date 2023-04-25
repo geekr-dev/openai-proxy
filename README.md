@@ -2,13 +2,15 @@
 
 基于 Go 实现的 OpenAI API HTTP 代理
 
+> 想要快速体验，将 OpenAI API 调用域名从默认的 `api.openai.com` 调整为 `open.aiproxy.xyz` 即可。
+
 ### 编译打包
 
 ```bash
 ./build.sh
 ```
 
-如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://chat2.gstatics.cn/main.zip>
+如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://storage.gstatics.cn/chat/main.zip>
 
 ### 部署测试
 
