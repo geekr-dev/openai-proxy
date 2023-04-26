@@ -2,7 +2,7 @@
 
 基于 Go 实现的 OpenAI API HTTP 代理
 
-> 想要快速体验，将 OpenAI API 调用域名从默认的 `api.openai.com` 调整为 `open.aiproxy.xyz` 即可。
+> 想要快速体验，将 OpenAI API 调用域名从默认的 `api.openai.com` 调整为 `open.aiproxy.xyz` 即可。你可以在这里看演示效果：<https://chat.geekr.dev>。
 
 ### 编译打包
 
