@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -84,6 +83,13 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	// 将响应状态码设置为原始响应状态码
 	w.WriteHeader(resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err == nil {
+			w.Write(bodyBytes)
+			return
+		}
+	}
 
 	// 将响应实体写入到响应流中（支持流式响应）
 	buf := make([]byte, 1024)
