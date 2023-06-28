@@ -44,6 +44,12 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	authorization := r.Header.Get("authorization")
+	proxyReq.Header = http.Header{
+		"Content-Type":  {"application/json"},
+		"authorization": {authorization},
+	}
+
 	// 将原始请求头复制到新请求中
 	for headerKey, headerValues := range r.Header {
 		for _, headerValue := range headerValues {
