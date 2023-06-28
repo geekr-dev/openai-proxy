@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -48,13 +49,6 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	proxyReq.Header = http.Header{
 		"Content-Type":  {"application/json"},
 		"authorization": {authorization},
-	}
-
-	// 将原始请求头复制到新请求中
-	for headerKey, headerValues := range r.Header {
-		for _, headerValue := range headerValues {
-			proxyReq.Header.Add(headerKey, headerValue)
-		}
 	}
 
 	// 默认超时时间设置为60s
