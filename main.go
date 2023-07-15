@@ -52,9 +52,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 默认超时时间设置为60s
+	// 默认超时时间设置为300s（应对长上下文）
 	client := &http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 300 * time.Second,
 	}
 
 	// 本地测试通过代理请求 OpenAI 接口
