@@ -2,5 +2,5 @@
 
 ./main
 
-# support other domain than https://api.openai.com (default)
+# support other domain than https://api.openai.com(default)
 # ./main -domain=https://api.other.com

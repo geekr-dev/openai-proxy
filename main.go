@@ -28,7 +28,7 @@ func main() {
 	}
 	log.Println("Target domain: ", target)
 	http.HandleFunc("/", handleRequest)
-	http.ListenAndServe(":9000", nil)
+	http.ListenAndServe(":9001", nil)
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
@@ -44,8 +44,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	newPath := strings.Replace(r.URL.Path, "/release", "", 1)
 	newPath = strings.Replace(newPath, "/test", "", 1)
 
-	// 拼接目标URL
+	// 拼接目标URL（带上查询字符串，如果有的话）
 	targetURL := target + newPath
+	if r.URL.RawQuery != "" {
+		targetURL += "?" + r.URL.RawQuery
+	}
 
 	// 创建代理HTTP请求
 	proxyReq, err := http.NewRequest(r.Method, targetURL, r.Body)
