@@ -6,7 +6,7 @@
 
 ### 切换到 Azure OpenAI
 
-默认使用 OpenAI API，要想切换到 Azure OpenAI API，可以在 `scf_bootstrap` 的启动命令中添加域名参数来指定你的 Azure OpenAI API Endpoint:
+默认代理 OpenAI API，要想切换到 Azure OpenAI API，可以在 `scf_bootstrap` 的启动命令中添加域名参数来指定你的 Azure OpenAI API Endpoint:
 
 ```bash
 ./main -domain=your-azure-openai-endpoint
