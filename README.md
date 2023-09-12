@@ -2,7 +2,15 @@
 
 基于 Go 实现的 OpenAI API HTTP 代理
 
-> 想要快速体验，将 OpenAI API 调用域名从默认的 `api.openai.com` 调整为 `open.aiproxy.xyz` 即可。你可以在这里看演示效果：<https://chat.geekr.dev>。
+> 想要快速体验，将 OpenAI API 调用域名从默认的 `api.openai.com` 调整为 `aiproxy.geekai.cc` 即可。你可以在这里预览演示效果：[演示应用](https://geekai.co/dati?invite_code=S564yq)。
+
+### 切换到 Azure OpenAI
+
+默认使用 OpenAI API，要想切换到 Azure OpenAI API，可以在 `scf_bootstrap` 的启动命令中添加域名参数来指定你的 Azure OpenAI API Endpoint:
+
+```bash
+./main -domain=your-azure-openai-endpoint
+```
 
 ### 编译打包
 
@@ -10,7 +18,7 @@
 ./build.sh
 ```
 
-如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://storage.gstatics.cn/chat/main.zip>
+此命令需要本地安装[go开发环境](https://go.dev/)，如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://storage.gstatics.cn/chat/main.zip>
 
 ### 部署测试
 
@@ -40,7 +48,7 @@ if os.Getenv("ENV") == "local" {
 ```
 ### 流式响应支持
 
-这个源代码本身是支持 stream 流式响应代理的，但目前腾讯云函数并不支持分块流式传输。所以，如果你需要实现流式响应，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI HTTP 代理了，如果你不想折腾，可以使用我这边提供的 `open.aiproxy.xyz` 作为代理进行测试：
+这个源代码本身是支持 stream 流式响应代理的，但目前腾讯云函数并不支持分块流式传输。所以，如果你需要实现流式响应，可以把编译后的二进制文件 `main` 丢到任意海外云服务器运行，这样就变成支持流式响应的 OpenAI HTTP 代理了，如果你不想折腾，可以使用我这边提供的 `aiproxy.geekai.cc` 作为代理进行测试：
 
 <img width="965" alt="image" src="https://user-images.githubusercontent.com/114386672/225609817-ca5c106b-22d4-4ae9-b3df-ca2c46d56843.png">
 
