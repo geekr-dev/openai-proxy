@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
 	"io"
 	"log"
 	"net/http"
@@ -12,11 +13,20 @@ import (
 )
 
 var (
-	target    = "https://api.openai.com" // 目标域名
+	target    string                     // 目标域名
 	httpProxy = "http://127.0.0.1:10809" // 本地代理地址和端口
 )
 
 func main() {
+	// 从命令行参数获取配置文件路径
+	flag.StringVar(&target, "domain", "https://api.openai.com", "The target domain to proxy.")
+	flag.Parse()
+
+	// 检查命令行参数是否提供了配置文件路径
+	if target == "" {
+		log.Fatalf("Please provide the target domain to proxy by '-domain' option")
+	}
+	log.Println("Target domain: ", target)
 	http.HandleFunc("/", handleRequest)
 	http.ListenAndServe(":9000", nil)
 }
