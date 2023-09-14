@@ -18,7 +18,7 @@
 ./build.sh
 ```
 
-此命令需要本地安装[go开发环境](https://go.dev/)，如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：<https://storage.gstatics.cn/chat/main.zip>
+此命令需要本地安装[go开发环境](https://go.dev/)，如果不想本地安装 go 环境进行编译打包，可以直接下载根据最新源代码编译打包好的 `main.zip`：[Release v1.0.0](https://github.com/geekr-dev/openai-proxy/releases/tag/v1.0.0)
 
 ### 部署测试
 
