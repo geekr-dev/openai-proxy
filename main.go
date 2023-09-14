@@ -8,27 +8,29 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var (
 	target    string                     // 目标域名
+	port      int                        // 代理端口
 	httpProxy = "http://127.0.0.1:10809" // 本地代理地址和端口
 )
 
 func main() {
 	// 从命令行参数获取配置文件路径
 	flag.StringVar(&target, "domain", "https://api.openai.com", "The target domain to proxy.")
+	flag.IntVar(&port, "port", 9000, "The proxy port.")
 	flag.Parse()
 
-	// 检查命令行参数是否提供了配置文件路径
-	if target == "" {
-		log.Fatalf("Please provide the target domain to proxy by '-domain' option")
-	}
+	// 打印配置信息
 	log.Println("Target domain: ", target)
+	log.Println("Proxy port: ", port)
+
 	http.HandleFunc("/", handleRequest)
-	http.ListenAndServe(":9001", nil)
+	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {

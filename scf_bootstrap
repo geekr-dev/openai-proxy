@@ -2,5 +2,5 @@
 
 ./main
 
-# support other domain than https://api.openai.com(default)
-# ./main -domain=https://api.other.com
+# support other domain and proxy port (default domain: https://api.openai.com, default port: 9000)
+# ./main -domain=https://api.other1.com -port=9001
