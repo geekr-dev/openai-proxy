@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -10,13 +10,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var (
-	target    string                     // 目标域名
-	port      int                        // 代理端口
-	httpProxy = "http://127.0.0.1:10809" // 本地代理地址和端口
+	target string // 目标域名
+	port   int    // 代理端口
+	// httpProxy = "http://127.0.0.1:10809" // 本地代理地址和端口
 )
 
 func main() {
@@ -42,6 +41,12 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 如果请求中包含 X-Target-Host 头，则使用该头作为目标域名
+	// 优先级 header > args > default
+	if r.Header.Get("X-Target-Host") != "" {
+		target = "https://" + r.Header.Get("X-Target-Host")
+	}
+
 	// 去掉环境前缀（针对腾讯云，如果包含的话，目前我只用到了test和release）
 	newPath := strings.Replace(r.URL.Path, "/release", "", 1)
 	newPath = strings.Replace(newPath, "/test", "", 1)
@@ -50,6 +55,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	targetURL := target + newPath
 	if r.URL.RawQuery != "" {
 		targetURL += "?" + r.URL.RawQuery
+	}
+
+	// 本地打印代理请求完整URL用于调试
+	if os.Getenv("ENV") == "local" {
+		fmt.Printf("Proxying request to: %s\n", targetURL)
 	}
 
 	// 创建代理HTTP请求
@@ -69,19 +79,19 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	// 默认超时时间设置为300s（应对长上下文）
 	client := &http.Client{
-		Timeout: 300 * time.Second,
+		// Timeout: 300 * time.Second,  // 代理不干涉超时逻辑，由客户端自行设置
 	}
 
-	// 本地测试通过代理请求 OpenAI 接口
-	if os.Getenv("ENV") == "local" {
+	// 支持本地测试通过代理请求
+	/*if os.Getenv("ENV") == "local" {
 		proxyURL, _ := url.Parse(httpProxy) // 本地HTTP代理配置
 		client.Transport = &http.Transport{
 			Proxy:           http.ProxyURL(proxyURL),
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-	}
+	}*/
 
-	// 向 OpenAI 发起代理请求
+	// 发起代理请求
 	resp, err := client.Do(proxyReq)
 	if err != nil {
 		log.Println("Error sending proxy request: ", err.Error())
