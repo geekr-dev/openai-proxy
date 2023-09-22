@@ -41,18 +41,19 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 如果请求中包含 X-Target-Host 头，则使用该头作为目标域名
-	// 优先级 header > args > default
-	if r.Header.Get("X-Target-Host") != "" {
-		target = "https://" + r.Header.Get("X-Target-Host")
-	}
-
 	// 去掉环境前缀（针对腾讯云，如果包含的话，目前我只用到了test和release）
 	newPath := strings.Replace(r.URL.Path, "/release", "", 1)
 	newPath = strings.Replace(newPath, "/test", "", 1)
 
 	// 拼接目标URL（带上查询字符串，如果有的话）
-	targetURL := target + newPath
+	// 如果请求中包含 X-Target-Host 头，则使用该头作为目标域名
+	// 优先级 header > args > default
+	var targetURL string
+	if r.Header.Get("X-Target-Host") != "" {
+		targetURL = "https://" + r.Header.Get("X-Target-Host") + newPath
+	} else {
+		targetURL = target + newPath
+	}
 	if r.URL.RawQuery != "" {
 		targetURL += "?" + r.URL.RawQuery
 	}
